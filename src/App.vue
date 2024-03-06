@@ -18,19 +18,40 @@
         width: '0',
         videoId: videoId,
         events: {
-            'onReady': onPlayerReady
+            'onReady': onPlayerReady,
+            'onStateChange': onPlayerStateChange
         }
     });
 }
+
+  function onPlayerStateChange(event) {
+      // Verifique o novo estado do player
+      switch (event.data) {
+          case YT.PlayerState.PLAYING:
+              startProgressTimer();
+              console.log('O vídeo começou a ser reproduzido');
+              break;
+          case YT.PlayerState.PAUSED:
+            stopProgressTimer();
+              console.log('O vídeo foi pausado');
+              break;
+          // case YT.PlayerState.ENDED:
+          //     // O vídeo chegou ao fim
+          //     console.log('O vídeo chegou ao fim');
+          //     break;
+          // Outros estados do player podem ser tratados aqui
+      }
+  }
   function onPlayerReady(event) {
     musicDuration.value = player.getDuration();
     event.target.playVideo();
-    startProgressTimer();
+    // startProgressTimer();
   }
 
   const progress = computed(() => ((musicProgress.value / musicDuration.value) * 100) + '%')
 
   async function play (videoId) {
+    musicProgress.value = 0
     createNewPlayer(videoId);
   }
 
@@ -49,10 +70,10 @@
 
   function toggleMusic () {
     if (player.getPlayerState() === YT.PlayerState.PAUSED) {
-      startProgressTimer()
+      
       player.playVideo();
     } else {
-      stopProgressTimer()
+      
       player.pauseVideo();
     }
   }
@@ -66,9 +87,7 @@
     }));
     const data = await response.json();
 
-    console.log(data.items);
     results.value = data.items
-    // play(data.items[0].id.videoId);
   }
 
   onMounted(() => {
